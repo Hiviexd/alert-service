@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const code = searchParams.get("code");
 
     if (!code) {
-        return NextResponse.redirect("/");
+        return NextResponse.redirect(new URL("/", request.url));
     }
 
     try {
