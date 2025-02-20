@@ -17,7 +17,7 @@ export default function Home() {
         type: null,
     });
     const { sendAlert, sending } = useAlert();
-    const { user, loading, login, logout } = useAuth();
+    const { user, loading, login, isLoggingIn, logout } = useAuth();
 
     const handleNotification = (message: string, type: "success" | "error" | null, timeout = 3000) => {
         setNotification({ message, type });
@@ -76,7 +76,11 @@ export default function Home() {
                         This will definitely get my attention faster than a Discord notification.
                     </p>
 
-                    {user ? <UserDisplay user={user} onLogout={logout} /> : <LoginButton onClick={login} />}
+                    {user ? (
+                        <UserDisplay user={user} onLogout={logout} />
+                    ) : (
+                        <LoginButton onClick={login} disabled={isLoggingIn} />
+                    )}
 
                     {user && (
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -95,11 +99,11 @@ export default function Home() {
                             </div>
 
                             <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={sending ? {} : { scale: 1.02 }}
+                                whileTap={sending ? {} : { scale: 0.98 }}
                                 type="submit"
                                 disabled={sending}
-                                className="w-full bg-gray-200/80 backdrop-blur-sm text-gray-900 py-2 rounded-lg hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50">
+                                className="w-full bg-gray-200/80 backdrop-blur-sm text-gray-900 py-2 rounded-lg hover:enabled:bg-red-600 hover:enabled:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50">
                                 {sending ? "Sending..." : "Send Alert"}
                             </motion.button>
                         </form>

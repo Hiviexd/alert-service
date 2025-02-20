@@ -4,6 +4,7 @@ import { OsuUser } from "@/interfaces/osu";
 export function useAuth() {
     const [user, setUser] = useState<OsuUser | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
     useEffect(() => {
         // Check if user is logged in on mount
@@ -23,6 +24,8 @@ export function useAuth() {
     };
 
     const login = () => {
+        if (isLoggingIn) return;
+        setIsLoggingIn(true);
         window.location.href = "/api/auth/login";
     };
 
@@ -37,5 +40,5 @@ export function useAuth() {
         }, 50);
     };
 
-    return { user, loading, login, logout };
+    return { user, loading, login, isLoggingIn, logout };
 }
