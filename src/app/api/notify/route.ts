@@ -1,28 +1,22 @@
 import { NextResponse } from "next/server";
-import helpers from "@/helpers";
+import { cookies } from "next/headers";
 
-if (!process.env.NTFY_URL || !process.env.OSU_API_KEY) {
+if (!process.env.NTFY_URL) {
     throw new Error("Required environment variables are not set");
 }
 
 export async function POST(request: Request) {
-    const { username, message, verifyUser } = await request.json();
-    let user;
+    const { message } = await request.json();
+
+    // Get authenticated user
+    const userCookie = (await cookies()).get("osu_user");
+    if (!userCookie?.value) {
+        return NextResponse.json({ success: false, error: "Not authenticated" }, { status: 401 });
+    }
+
+    const user = JSON.parse(userCookie.value);
 
     try {
-        if (verifyUser) {
-            const verifiedUser = await helpers.verifyOsuUsername(username);
-            if (!verifiedUser) {
-                return NextResponse.json({ success: false, error: "Invalid osu! username" }, { status: 400 });
-            }
-            user = verifiedUser;
-        } else {
-            user = {
-                username: username,
-                user_id: "@" + username,
-            };
-        }
-
         await fetch(`${process.env.NTFY_URL}`, {
             method: "POST",
             body: message,
@@ -30,7 +24,7 @@ export async function POST(request: Request) {
                 Title: `ALERT from: ${user.username}`,
                 Priority: "max",
                 Tags: "rotating_light,rotating_light",
-                Actions: `view, osu! profile, https://osu.ppy.sh/users/${user.user_id}`,
+                Actions: `view, osu! profile, https://osu.ppy.sh/users/${user.id}`,
             },
         });
 

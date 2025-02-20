@@ -1,19 +1,14 @@
 import { useState } from "react";
-import helpers from "@/helpers";
 
 interface NotifyParams {
-    username: string;
     message: string;
-    verifyUser?: boolean;
 }
 
 export function useNotify() {
     const [sending, setSending] = useState(false);
 
-    const sendNotification = async ({ username, message }: NotifyParams) => {
+    const sendNotification = async ({ message }: NotifyParams) => {
         setSending(true);
-        console.log(process.env.VERIFY_OSU_USERS);
-        console.log(helpers.parseBool(process.env.VERIFY_OSU_USERS));
 
         try {
             const response = await fetch("/api/notify", {
@@ -22,9 +17,7 @@ export function useNotify() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    username,
                     message,
-                    verifyUser: helpers.parseBool(process.env.VERIFY_OSU_USERS),
                 }),
             });
 
