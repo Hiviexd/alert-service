@@ -4,6 +4,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNotify } from "@/hooks/useNotify";
 import { Alert } from "@/components/Alert";
+import logo from "../../public/logo.svg";
+import Image from "next/image";
 
 export default function Home() {
     const [username, setUsername] = useState("");
@@ -51,13 +53,16 @@ export default function Home() {
     };
 
     return (
-        <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800">
+        <main className="min-h-screen-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800">
             <Alert message={alert.message} type={alert.type} />
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative w-full max-w-md mx-4 backdrop-blur-sm bg-gray-800/30 rounded-xl shadow-xl p-8 border border-gray-700/50 backdrop-filter">
-                <h1 className="text-2xl font-bold text-gray-100 mb-6">Alert</h1>
+                className="relative w-full max-w-md m-6 backdrop-blur-sm bg-gray-800/30 rounded-xl shadow-xl p-8 border border-gray-700/50 backdrop-filter">
+                <span className="text-2xl font-bold text-gray-100 mb-4 flex items-center">
+                    <Image src={logo} alt="logo" className="w-10 h-10 inline-block mr-2" />
+                    Alert
+                </span>
                 <p className="text-gray-300 mb-6">
                     Something broke that needs my immediate attention? Use this to alert me if I&apos;m not responsive.
                     <br />
