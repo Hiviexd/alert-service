@@ -16,16 +16,11 @@ export function useAlert() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    message,
-                }),
+                body: JSON.stringify({ message }),
             });
 
-            if (response.ok) {
-                return { success: true };
-            }
-            const res = await response.json();
-            return { success: false, error: `Failed to send alert: ${res.error}` };
+            const data = await response.json();
+            return { success: response.ok, error: data.error };
         } catch (error) {
             return { success: false, error: `Failed to send alert: ${error}` };
         } finally {
@@ -34,4 +29,4 @@ export function useAlert() {
     };
 
     return { sendAlert, sending };
-}
+};
