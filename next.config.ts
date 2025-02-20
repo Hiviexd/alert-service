@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
         OSU_CLIENT_SECRET: process.env.OSU_CLIENT_SECRET,
         OSU_CALLBACK_URL: process.env.OSU_CALLBACK_URL,
     },
+    images: {
+        domains: ["a.ppy.sh"],
+    },
 };
 
 export default nextConfig;

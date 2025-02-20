@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { useNotify } from "@/hooks/useNotify";
 import { useAuth } from "@/hooks/useAuth";
 import { Alert } from "@/components/Alert";
+import { LoginButton } from "@/components/LoginButton";
+import { UserDisplay } from "@/components/UserDisplay";
 import logo from "../../public/logo.svg";
 import Image from "next/image";
 
@@ -15,7 +17,7 @@ export default function Home() {
         type: null,
     });
     const { sendNotification, sending } = useNotify();
-    const { user, loading, login } = useAuth();
+    const { user, loading, login, logout } = useAuth();
 
     const handleClientNotification = (message: string, type: "success" | "error" | null, timeout = 3000) => {
         setAlert({ message, type });
@@ -46,20 +48,6 @@ export default function Home() {
         }
     };
 
-    if (!user) {
-        return (
-            <main className="min-h-screen-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800">
-                <motion.button
-                    onClick={login}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="px-6 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-all">
-                    Login with osu!
-                </motion.button>
-            </main>
-        );
-    }
-
     return (
         <main className="min-h-screen-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800">
             <Alert message={alert.message} type={alert.type} />
@@ -77,33 +65,47 @@ export default function Home() {
                         responsive.
                     </p>
                     <p className="text-gray-300 mb-6">
-                        Chances this gets my attention faster than a Discord notification.
+                        This will definitely get my attention faster than a Discord notification.
                     </p>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-1">
-                                Describe your issue
-                            </label>
-                            <motion.textarea
-                                whileFocus={{ scale: 1.01 }}
-                                id="message"
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-600/50 bg-gray-700/50 text-gray-100 focus:ring-2 focus:ring-gray-500 focus:border-transparent outline-none transition-all placeholder-gray-400 backdrop-blur-sm"
-                                rows={4}
-                            />
-                        </div>
+                    <div className="mb-6">
+                        {user ? (
+                            <UserDisplay 
+                            username={user.username} 
+                            avatar_url={user.avatar_url} 
+                            onLogout={logout} 
+                        />
+                        ) : (
+                            <LoginButton onClick={login} />
+                        )}
+                    </div>
 
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            type="submit"
-                            disabled={sending}
-                            className="w-full bg-gray-200/80 backdrop-blur-sm text-gray-900 py-2 rounded-lg hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50">
-                            {sending ? "Sending..." : "Send Alert"}
-                        </motion.button>
-                    </form>
+                    {user && (
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-1">
+                                    Describe your issue
+                                </label>
+                                <motion.textarea
+                                    whileFocus={{ scale: 1.01 }}
+                                    id="message"
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-600/50 bg-gray-700/50 text-gray-100 focus:ring-2 focus:ring-gray-500 focus:border-transparent outline-none transition-all placeholder-gray-400 backdrop-blur-sm"
+                                    rows={4}
+                                />
+                            </div>
+
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                type="submit"
+                                disabled={sending}
+                                className="w-full bg-gray-200/80 backdrop-blur-sm text-gray-900 py-2 rounded-lg hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50">
+                                {sending ? "Sending..." : "Send Alert"}
+                            </motion.button>
+                        </form>
+                    )}
                 </motion.div>
             )}
         </main>
