@@ -29,6 +29,12 @@ export function useAuth() {
     const logout = async () => {
         await fetch("/api/auth/logout");
         setUser(null);
+
+        // needed for triggering the form animation
+        setLoading(true);
+        setTimeout(() => {
+            setLoading(false);
+        }, 50);
     };
 
     return { user, loading, login, logout };

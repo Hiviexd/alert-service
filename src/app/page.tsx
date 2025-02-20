@@ -31,7 +31,7 @@ export default function Home() {
 
         // Form validation
         if (!sanitizedMessage) {
-            handleNotification("Please describe your issue", "error");
+            handleNotification("Please describe your issue!", "error");
             return;
         }
 
@@ -57,8 +57,16 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     className="relative w-full max-w-md m-6 backdrop-blur-sm bg-gray-800/30 rounded-xl shadow-xl p-8 border border-gray-700/50 backdrop-filter">
                     <span className="text-2xl font-bold text-gray-100 mb-4 flex items-center">
-                        <Image src={logo} alt="logo" className="w-10 h-10 inline-block mr-2" />
-                        Alert
+                        <motion.a
+                            href="https://hivie.tn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            whileHover={{ scale: 1.15 }}
+                            transition={{ duration: 0.15 }}
+                            className="inline-block transition-transform">
+                            <Image src={logo} alt="Hivie" className="w-10 h-10" />
+                        </motion.a>
+                        <span className="ml-2">Alert</span>
                     </span>
                     <p className="text-gray-300 mb-3">
                         Something broke that needs my immediate attention? Use this to alert me if I&apos;m not
@@ -68,17 +76,7 @@ export default function Home() {
                         This will definitely get my attention faster than a Discord notification.
                     </p>
 
-                    <div className="mb-6">
-                        {user ? (
-                            <UserDisplay 
-                            username={user.username} 
-                            avatar_url={user.avatar_url} 
-                            onLogout={logout} 
-                        />
-                        ) : (
-                            <LoginButton onClick={login} />
-                        )}
-                    </div>
+                    {user ? <UserDisplay user={user} onLogout={logout} /> : <LoginButton onClick={login} />}
 
                     {user && (
                         <form onSubmit={handleSubmit} className="space-y-4">
