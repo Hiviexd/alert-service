@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useNotify } from "@/hooks/useNotify";
+import { useAlert } from "@/hooks/useAlert";
 import { useAuth } from "@/hooks/useAuth";
-import { Alert } from "@/components/Alert";
+import { Notification } from "@/components/Notification";
 import { LoginButton } from "@/components/LoginButton";
 import { UserDisplay } from "@/components/UserDisplay";
 import logo from "../../public/logo.svg";
@@ -12,16 +12,16 @@ import Image from "next/image";
 
 export default function Home() {
     const [message, setMessage] = useState("");
-    const [alert, setAlert] = useState<{ message: string | null; type: "success" | "error" | null }>({
+    const [notification, setNotification] = useState<{ message: string | null; type: "success" | "error" | null }>({
         message: null,
         type: null,
     });
-    const { sendNotification, sending } = useNotify();
+    const { sendAlert, sending } = useAlert();
     const { user, loading, login, logout } = useAuth();
 
-    const handleClientNotification = (message: string, type: "success" | "error" | null, timeout = 3000) => {
-        setAlert({ message, type });
-        setTimeout(() => setAlert({ message: null, type: null }), timeout);
+    const handleNotification = (message: string, type: "success" | "error" | null, timeout = 3000) => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification({ message: null, type: null }), timeout);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -31,26 +31,26 @@ export default function Home() {
 
         // Form validation
         if (!sanitizedMessage) {
-            handleClientNotification("Please describe your issue", "error");
+            handleNotification("Please describe your issue", "error");
             return;
         }
 
-        // Send notification
-        const result = await sendNotification({
+        // Send alert
+        const result = await sendAlert({
             message: sanitizedMessage,
         });
 
         if (result.success) {
             setMessage("");
-            handleClientNotification("Alert sent successfully!", "success");
+            handleNotification("Alert sent successfully!", "success");
         } else {
-            handleClientNotification(result.error as string, "error", 5000);
+            handleNotification(result.error as string, "error", 5000);
         }
     };
 
     return (
         <main className="min-h-screen-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800">
-            <Alert message={alert.message} type={alert.type} />
+            <Notification message={notification.message} type={notification.type} />
             {!loading && (
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

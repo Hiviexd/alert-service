@@ -2,12 +2,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 
-type AlertProps = {
+type NotificationProps = {
     message: string | null;
     type: "success" | "error" | null;
 };
 
-export function Alert({ message, type }: AlertProps) {
+export function Notification({ message, type }: NotificationProps) {
     return (
         <AnimatePresence>
             {message && (

@@ -1,17 +1,17 @@
 import { useState } from "react";
 
-interface NotifyParams {
+interface AlertParams {
     message: string;
 }
 
-export function useNotify() {
+export function useAlert() {
     const [sending, setSending] = useState(false);
 
-    const sendNotification = async ({ message }: NotifyParams) => {
+    const sendAlert = async ({ message }: AlertParams) => {
         setSending(true);
 
         try {
-            const response = await fetch("/api/notify", {
+            const response = await fetch("/api/alert", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -33,5 +33,5 @@ export function useNotify() {
         }
     };
 
-    return { sendNotification, sending };
+    return { sendAlert, sending };
 }
