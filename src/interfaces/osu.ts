@@ -1,4 +1,5 @@
 export interface OsuUser {
-    user_id: string;
+    id: number;
     username: string;
+    avatar_url: string;
 }

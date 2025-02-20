@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-
-interface OsuUser {
-    id: number;
-    username: string;
-    avatar_url: string;
-}
+import { OsuUser } from "@/interfaces/osu";
 
 export function useAuth() {
     const [user, setUser] = useState<OsuUser | null>(null);
