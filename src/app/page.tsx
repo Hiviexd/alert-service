@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useAlert } from "@/hooks/useAlert";
 import { useAuth } from "@/hooks/useAuth";
-import { Notification } from "@/components/Notification";
+import { Notification, INotification } from "@/components/Notification";
 import { LoginButton } from "@/components/LoginButton";
 import { UserDisplay } from "@/components/UserDisplay";
 import logo from "../../public/logo.svg";
@@ -12,15 +12,15 @@ import Image from "next/image";
 
 export default function Home() {
     const [message, setMessage] = useState("");
-    const [notification, setNotification] = useState<{ message: string | null; type: "success" | "error" | null }>({
+    const [notification, setNotification] = useState<INotification>({
         message: null,
         type: null,
     });
     const { sendAlert, sending } = useAlert();
     const { user, loading, login, isLoggingIn, logout } = useAuth();
 
-    const handleNotification = (message: string, type: "success" | "error" | null, timeout = 3000) => {
-        setNotification({ message, type });
+    const handleNotification = (notification: INotification, timeout = 3000) => {
+        setNotification(notification);
         setTimeout(() => setNotification({ message: null, type: null }), timeout);
     };
 
@@ -31,7 +31,7 @@ export default function Home() {
 
         // Form validation
         if (!sanitizedMessage) {
-            handleNotification("Please describe your issue!", "error");
+            handleNotification({ message: "Please describe your issue!", type: "error" });
             return;
         }
 
@@ -42,9 +42,9 @@ export default function Home() {
 
         if (result.success) {
             setMessage("");
-            handleNotification("Alert sent successfully!", "success");
+            handleNotification({ message: "Alert sent successfully!", type: "success" });
         } else {
-            handleNotification(result.error as string, "error", 5000);
+            handleNotification({ message: result.error as string, type: "error" }, 5000);
         }
     };
 
@@ -95,18 +95,22 @@ export default function Home() {
                                 id="message"
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
-                                className={`w-full px-4 py-2 rounded-lg border border-gray-600/50 bg-gray-700/50 text-gray-100 focus:ring-2 focus:ring-gray-500 focus:border-transparent outline-none transition-all placeholder-gray-400 backdrop-blur-sm ${!user ? 'cursor-not-allowed' : ''}`}
+                                className={`w-full px-4 py-2 rounded-lg border border-gray-600/50 bg-gray-700/50 text-gray-100 focus:ring-2 focus:ring-gray-500 focus:border-transparent outline-none transition-all placeholder-gray-400 backdrop-blur-sm ${
+                                    !user ? "cursor-not-allowed opacity-60" : ""
+                                }`}
                                 rows={4}
                                 disabled={!user}
                             />
                         </div>
 
                         <motion.button
-                            whileHover={!user || sending ? {} : { scale: 1.02 }}
-                            whileTap={!user || sending ? {} : { scale: 0.98 }}
+                            whileHover={!user || sending || message.trim() === "" ? {} : { scale: 1.02 }}
+                            whileTap={!user || sending || message.trim() === "" ? {} : { scale: 0.98 }}
                             type="submit"
-                            disabled={!user || sending}
-                            className={`w-full bg-gray-200/80 backdrop-blur-sm text-gray-900 py-2 rounded-lg hover:enabled:bg-red-600 hover:enabled:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 ${!user ? 'cursor-not-allowed' : ''}`}>
+                            disabled={!user || sending || message.trim() === ""}
+                            className={`w-full bg-gray-200/80 backdrop-blur-sm text-gray-900 py-2 rounded-lg hover:enabled:bg-red-600 hover:enabled:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 ${
+                                !user || sending || message.trim() === "" ? "cursor-not-allowed" : ""
+                            }`}>
                             {sending ? "Sending..." : "Send Alert"}
                         </motion.button>
                     </form>
