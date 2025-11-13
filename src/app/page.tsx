@@ -73,7 +73,8 @@ export default function Home() {
                         responsive.
                     </p>
                     <p className="text-gray-300 mb-6">
-                        This will definitely get my attention faster than a Discord notification.
+                        This will blow up my phone with notifications and will definitely get my attention faster than a
+                        Discord message.
                     </p>
 
                     {user ? (
@@ -82,32 +83,33 @@ export default function Home() {
                         <LoginButton onClick={login} disabled={isLoggingIn} />
                     )}
 
-                    {user && (
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-1">
-                                    Describe your issue
-                                </label>
-                                <motion.textarea
-                                    whileFocus={{ scale: 1.01 }}
-                                    id="message"
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-600/50 bg-gray-700/50 text-gray-100 focus:ring-2 focus:ring-gray-500 focus:border-transparent outline-none transition-all placeholder-gray-400 backdrop-blur-sm"
-                                    rows={4}
-                                />
-                            </div>
+                    <hr className="my-6 border-gray-700/60" />
 
-                            <motion.button
-                                whileHover={sending ? {} : { scale: 1.02 }}
-                                whileTap={sending ? {} : { scale: 0.98 }}
-                                type="submit"
-                                disabled={sending}
-                                className="w-full bg-gray-200/80 backdrop-blur-sm text-gray-900 py-2 rounded-lg hover:enabled:bg-red-600 hover:enabled:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50">
-                                {sending ? "Sending..." : "Send Alert"}
-                            </motion.button>
-                        </form>
-                    )}
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
+                                Describe your issue
+                            </label>
+                            <motion.textarea
+                                whileFocus={{ scale: 1.01 }}
+                                id="message"
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                className={`w-full px-4 py-2 rounded-lg border border-gray-600/50 bg-gray-700/50 text-gray-100 focus:ring-2 focus:ring-gray-500 focus:border-transparent outline-none transition-all placeholder-gray-400 backdrop-blur-sm ${!user ? 'cursor-not-allowed' : ''}`}
+                                rows={4}
+                                disabled={!user}
+                            />
+                        </div>
+
+                        <motion.button
+                            whileHover={!user || sending ? {} : { scale: 1.02 }}
+                            whileTap={!user || sending ? {} : { scale: 0.98 }}
+                            type="submit"
+                            disabled={!user || sending}
+                            className={`w-full bg-gray-200/80 backdrop-blur-sm text-gray-900 py-2 rounded-lg hover:enabled:bg-red-600 hover:enabled:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 ${!user ? 'cursor-not-allowed' : ''}`}>
+                            {sending ? "Sending..." : "Send Alert"}
+                        </motion.button>
+                    </form>
                 </motion.div>
             )}
         </main>
