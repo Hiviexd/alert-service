@@ -16,7 +16,7 @@ export function LoginButton({ onClick, disabled }: LoginButtonProps) {
             disabled={disabled}
             className="w-full px-6 py-3 bg-pink-600 text-white rounded-lg hover:enabled:bg-pink-700 transition-all flex items-center justify-center disabled:opacity-50">
             <Image src={osuLogo} alt="osu!" className="w-6 h-6 inline-block mr-2" />
-            Who are you, anyway?
+            Identify yourself, or else!
         </motion.button>
     );
 }
