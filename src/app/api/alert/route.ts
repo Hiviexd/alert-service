@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
+import { buildAlertActions } from "@/lib/ntfy/actions";
 
 if (!process.env.NTFY_URL) {
     throw new Error("Required environment variables are not set");
@@ -34,6 +35,11 @@ export async function POST(request: Request) {
     }
 
     try {
+        const osuProfileUrl = `https://osu.ppy.sh/users/${session.id}`;
+        const actions = buildAlertActions(message, [
+            { label: "osu! profile", url: osuProfileUrl },
+        ]);
+
         await fetch(`${process.env.NTFY_URL}`, {
             method: "POST",
             body: message,
@@ -41,7 +47,7 @@ export async function POST(request: Request) {
                 Title: `ALERT from: ${session.username}`,
                 Priority: "max",
                 Tags: "rotating_light,rotating_light",
-                Actions: `view, osu! profile, https://osu.ppy.sh/users/${session.id}`,
+                Actions: actions,
             },
         });
 
