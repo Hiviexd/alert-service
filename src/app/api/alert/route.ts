@@ -1,14 +1,27 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
+import {
+    getAlertCooldownRemainingSeconds,
+    getAlertCooldownSeconds,
+} from "@/lib/alert/cooldown";
 import { buildAlertActions } from "@/lib/ntfy/actions";
 
 if (!process.env.NTFY_URL) {
     throw new Error("Required environment variables are not set");
 }
 
-const COOLDOWN_MS = process.env.ALERT_COOLDOWN_SECONDS
-    ? parseInt(process.env.ALERT_COOLDOWN_SECONDS) * 1000
-    : 60000;
+export async function GET() {
+    const session = await getSession();
+
+    if (!session.id) {
+        return NextResponse.json({ success: false, error: "Not authenticated" }, { status: 401 });
+    }
+
+    return NextResponse.json({
+        remainingSeconds: getAlertCooldownRemainingSeconds(session.lastAlertAt),
+        cooldownSeconds: getAlertCooldownSeconds(),
+    });
+}
 
 export async function POST(request: Request) {
     const { message } = await request.json();
@@ -20,18 +33,16 @@ export async function POST(request: Request) {
 
     const now = Date.now();
 
-    if (session.lastAlertAt) {
-        const timeSinceLastAlert = now - session.lastAlertAt;
-        if (timeSinceLastAlert < COOLDOWN_MS) {
-            const remainingTime = Math.ceil((COOLDOWN_MS - timeSinceLastAlert) / 1000);
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: `Please wait ${remainingTime} seconds before sending another alert`,
-                },
-                { status: 429 }
-            );
-        }
+    const remainingSeconds = getAlertCooldownRemainingSeconds(session.lastAlertAt);
+    if (remainingSeconds > 0) {
+        return NextResponse.json(
+            {
+                success: false,
+                error: `Please wait ${remainingSeconds} seconds before sending another alert`,
+                remainingSeconds,
+            },
+            { status: 429 }
+        );
     }
 
     try {
@@ -54,7 +65,10 @@ export async function POST(request: Request) {
         session.lastAlertAt = now;
         await session.save();
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json({
+            success: true,
+            remainingSeconds: getAlertCooldownRemainingSeconds(session.lastAlertAt),
+        });
     } catch (error) {
         return NextResponse.json({ success: false, error: `Failed to send notification: ${error}` }, { status: 500 });
     }

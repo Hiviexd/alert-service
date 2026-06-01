@@ -16,8 +16,8 @@ export default function Home() {
         message: null,
         type: null,
     });
-    const { sendAlert, sending } = useAlert();
     const { user, loading, login, isLoggingIn, logout } = useAuth();
+    const { sendAlert, sending, cooldownRemaining, onCooldown } = useAlert(!!user);
 
     const handleNotification = (notification: INotification, timeout = 3000) => {
         setNotification(notification);
@@ -104,14 +104,24 @@ export default function Home() {
                         </div>
 
                         <motion.button
-                            whileHover={!user || sending || message.trim() === "" ? {} : { scale: 1.02 }}
-                            whileTap={!user || sending || message.trim() === "" ? {} : { scale: 0.98 }}
+                            whileHover={
+                                !user || sending || onCooldown || message.trim() === "" ? {} : { scale: 1.02 }
+                            }
+                            whileTap={
+                                !user || sending || onCooldown || message.trim() === "" ? {} : { scale: 0.98 }
+                            }
                             type="submit"
-                            disabled={!user || sending || message.trim() === ""}
+                            disabled={!user || sending || onCooldown || message.trim() === ""}
                             className={`w-full bg-gray-200/80 backdrop-blur-sm text-gray-900 py-2 rounded-lg hover:enabled:bg-red-600 hover:enabled:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 ${
-                                !user || sending || message.trim() === "" ? "cursor-not-allowed" : ""
+                                !user || sending || onCooldown || message.trim() === ""
+                                    ? "cursor-not-allowed"
+                                    : ""
                             }`}>
-                            {sending ? "Sending..." : "Send Alert"}
+                            {sending
+                                ? "Sending..."
+                                : onCooldown
+                                  ? `Wait ${cooldownRemaining}s before sending another alert`
+                                  : "Send Alert"}
                         </motion.button>
                     </form>
                 </motion.div>
