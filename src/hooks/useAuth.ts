@@ -23,14 +23,25 @@ export function useAuth() {
         }
     };
 
-    const login = () => {
+    const login = async () => {
         if (isLoggingIn) return;
         setIsLoggingIn(true);
-        window.location.href = "/api/auth/login";
+
+        try {
+            const res = await fetch("/api/auth/login", { method: "POST" });
+            if (!res.ok) return;
+
+            const { url } = await res.json();
+            if (url) {
+                window.location.href = url;
+            }
+        } finally {
+            setIsLoggingIn(false);
+        }
     };
 
     const logout = async () => {
-        await fetch("/api/auth/logout");
+        await fetch("/api/auth/logout", { method: "POST" });
         setUser(null);
 
         // needed for triggering the form animation

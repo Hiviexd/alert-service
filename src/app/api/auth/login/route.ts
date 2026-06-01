@@ -1,16 +1,23 @@
 import { NextResponse } from "next/server";
+import { createOAuthState } from "@/lib/auth/oauth";
+import { setOAuthStateCookie } from "@/lib/auth/oauth-state";
 
-if (!process.env.OSU_CLIENT_ID || !process.env.OSU_CALLBACK_URL) {
-    throw new Error("Missing required environment variables for osu! OAuth");
-}
+async function initiateLogin() {
+    const state = createOAuthState();
+    await setOAuthStateCookie(state);
 
-export async function GET() {
     const params = new URLSearchParams({
         client_id: process.env.OSU_CLIENT_ID as string,
         redirect_uri: process.env.OSU_CALLBACK_URL as string,
         response_type: "code",
         scope: "identify",
+        state,
     });
 
-    return NextResponse.redirect(`https://osu.ppy.sh/oauth/authorize?${params}`);
+    const authorizeUrl = `https://osu.ppy.sh/oauth/authorize?${params}`;
+    return NextResponse.json({ url: authorizeUrl });
+}
+
+export async function POST() {
+    return initiateLogin();
 }

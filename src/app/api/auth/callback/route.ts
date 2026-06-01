@@ -1,55 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-
-if (!process.env.OSU_CLIENT_ID || !process.env.OSU_CLIENT_SECRET || !process.env.OSU_CALLBACK_URL) {
-    throw new Error("Missing required environment variables for osu! OAuth");
-}
+import { exchangeCodeForUser } from "@/lib/auth/oauth";
+import { verifyAndClearOAuthState } from "@/lib/auth/oauth-state";
+import { clearLegacyAuthCookies, getSession } from "@/lib/auth/session";
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get("code");
+    const state = searchParams.get("state");
 
-    if (!code) {
-        return NextResponse.redirect(new URL("/", request.url));
+    if (!code || !state) {
+        return NextResponse.redirect(new URL("/?error=auth_failed", request.url));
+    }
+
+    const stateValid = await verifyAndClearOAuthState(state);
+    if (!stateValid) {
+        return NextResponse.redirect(new URL("/?error=auth_failed", request.url));
     }
 
     try {
-        // Exchange code for token
-        const tokenRes = await fetch("https://osu.ppy.sh/oauth/token", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                client_id: process.env.OSU_CLIENT_ID,
-                client_secret: process.env.OSU_CLIENT_SECRET,
-                code,
-                grant_type: "authorization_code",
-                redirect_uri: process.env.OSU_CALLBACK_URL,
-            }),
-        });
+        const user = await exchangeCodeForUser(code);
+        const session = await getSession();
 
-        const { access_token } = await tokenRes.json();
+        session.id = user.id;
+        session.username = user.username;
+        session.avatar_url = user.avatar_url;
+        await session.save();
 
-        // Get user data
-        const userRes = await fetch("https://osu.ppy.sh/api/v2/me", {
-            headers: {
-                Authorization: `Bearer ${access_token}`,
-            },
-        });
-
-        const userData = await userRes.json();
-
-        // Store user data in cookie
-        (await cookies()).set(
-            "osu_user",
-            JSON.stringify({
-                id: userData.id,
-                username: userData.username,
-                avatar_url: userData.avatar_url,
-            }),
-            { secure: true, httpOnly: true }
-        );
+        await clearLegacyAuthCookies();
 
         return NextResponse.redirect(new URL("/", request.url));
     } catch (error) {

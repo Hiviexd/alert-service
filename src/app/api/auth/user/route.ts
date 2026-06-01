@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { getSession } from "@/lib/auth/session";
 
 export async function GET() {
-    const userCookie = (await cookies()).get("osu_user");
+    const session = await getSession();
 
-    if (!userCookie?.value) {
+    if (!session.id) {
         return NextResponse.json(null);
     }
 
-    return NextResponse.json(JSON.parse(userCookie.value));
+    return NextResponse.json({
+        id: session.id,
+        username: session.username,
+        avatar_url: session.avatar_url,
+    });
 }

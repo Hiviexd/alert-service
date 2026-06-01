@@ -1,32 +1,26 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { getSession } from "@/lib/auth/session";
 
 if (!process.env.NTFY_URL) {
     throw new Error("Required environment variables are not set");
 }
 
-const COOLDOWN_MS = 
-    process.env.ALERT_COOLDOWN_SECONDS
-        ? parseInt(process.env.ALERT_COOLDOWN_SECONDS) * 1000 
-        : 60000;
+const COOLDOWN_MS = process.env.ALERT_COOLDOWN_SECONDS
+    ? parseInt(process.env.ALERT_COOLDOWN_SECONDS) * 1000
+    : 60000;
 
 export async function POST(request: Request) {
     const { message } = await request.json();
+    const session = await getSession();
 
-    // Get authenticated user
-    const cookieStore = await cookies();
-    const userCookie = cookieStore.get("osu_user");
-    if (!userCookie?.value) {
+    if (!session.id) {
         return NextResponse.json({ success: false, error: "Not authenticated" }, { status: 401 });
     }
 
-    const user = JSON.parse(userCookie.value);
-
-    const lastAlert = cookieStore.get("last_alert");
     const now = Date.now();
 
-    if (lastAlert) {
-        const timeSinceLastAlert = now - parseInt(lastAlert.value);
+    if (session.lastAlertAt) {
+        const timeSinceLastAlert = now - session.lastAlertAt;
         if (timeSinceLastAlert < COOLDOWN_MS) {
             const remainingTime = Math.ceil((COOLDOWN_MS - timeSinceLastAlert) / 1000);
             return NextResponse.json(
@@ -44,18 +38,15 @@ export async function POST(request: Request) {
             method: "POST",
             body: message,
             headers: {
-                Title: `ALERT from: ${user.username}`,
+                Title: `ALERT from: ${session.username}`,
                 Priority: "max",
                 Tags: "rotating_light,rotating_light",
-                Actions: `view, osu! profile, https://osu.ppy.sh/users/${user.id}`,
+                Actions: `view, osu! profile, https://osu.ppy.sh/users/${session.id}`,
             },
         });
 
-        // Set the last alert timestamp
-        cookieStore.set("last_alert", now.toString(), {
-            httpOnly: true,
-            secure: true,
-        });
+        session.lastAlertAt = now;
+        await session.save();
 
         return NextResponse.json({ success: true });
     } catch (error) {

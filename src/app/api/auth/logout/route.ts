@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { clearLegacyAuthCookies, getSession } from "@/lib/auth/session";
 
-export async function GET(request: NextRequest) {
-    (await cookies()).delete("osu_user");
-    return NextResponse.redirect(new URL("/", request.url));
+export async function POST() {
+    const session = await getSession();
+    session.destroy();
+    await clearLegacyAuthCookies();
+
+    return NextResponse.json({ success: true });
 }
