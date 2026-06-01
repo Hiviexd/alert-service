@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Notification, INotification } from "@/components/Notification";
 import { LoginButton } from "@/components/LoginButton";
 import { UserDisplay } from "@/components/UserDisplay";
+import { AutoResizeTextarea } from "@/components/AutoResizeTextarea";
 import logo from "../../public/logo.svg";
 import Image from "next/image";
 
@@ -49,13 +50,14 @@ export default function Home() {
     };
 
     return (
-        <main className="min-h-screen-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800">
+        <main className="min-h-screen-dvh overflow-y-auto bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800">
             <Notification message={notification.message} type={notification.type} />
             {!loading && (
+                <div className="flex min-h-screen-dvh w-full flex-col items-center justify-center p-6">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="relative w-full max-w-md m-6 backdrop-blur-sm bg-gray-800/30 rounded-xl shadow-xl p-8 border border-gray-700/50 backdrop-filter">
+                    className="relative w-full max-w-md backdrop-blur-sm bg-gray-800/30 rounded-xl shadow-xl p-8 border border-gray-700/50 backdrop-filter">
                     <span className="text-2xl font-bold text-gray-100 mb-4 flex items-center">
                         <motion.a
                             href="https://hivie.tn"
@@ -66,7 +68,7 @@ export default function Home() {
                             className="inline-block transition-transform">
                             <Image src={logo} alt="Hivie" className="w-10 h-10" />
                         </motion.a>
-                        <span className="ml-2">Alert</span>
+                        <span className="ml-2">Alert Hivie</span>
                     </span>
                     <p className="text-gray-300 mb-3">
                         Something broke that needs my immediate attention? Use this to alert me if I&apos;m not
@@ -90,15 +92,13 @@ export default function Home() {
                             <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
                                 Describe your issue
                             </label>
-                            <motion.textarea
-                                whileFocus={{ scale: 1.01 }}
+                            <AutoResizeTextarea
                                 id="message"
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 className={`w-full px-4 py-2 rounded-lg border border-gray-600/50 bg-gray-700/50 text-gray-100 focus:ring-2 focus:ring-gray-500 focus:border-transparent outline-none transition-all placeholder-gray-400 backdrop-blur-sm ${
                                     !user ? "cursor-not-allowed opacity-60" : ""
                                 }`}
-                                rows={4}
                                 disabled={!user}
                             />
                         </div>
@@ -125,6 +125,7 @@ export default function Home() {
                         </motion.button>
                     </form>
                 </motion.div>
+                </div>
             )}
         </main>
     );
